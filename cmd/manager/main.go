@@ -11,9 +11,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"github.com/unified-operator/nginx-operator/pkg/apis"
-	"github.com/unified-operator/nginx-operator/pkg/controller"
-	"github.com/unified-operator/nginx-operator/version"
+	"github.com/chenzhiwei/nginx-operator/pkg/apis"
+	"github.com/chenzhiwei/nginx-operator/pkg/controller"
+	"github.com/chenzhiwei/nginx-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"

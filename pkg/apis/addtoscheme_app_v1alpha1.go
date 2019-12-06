@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/unified-operator/nginx-operator/pkg/apis/app/v1alpha1"
+	"github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 )
 
 func init() {

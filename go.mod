@@ -1,4 +1,4 @@
-module github.com/unified-operator/nginx-operator
+module github.com/chenzhiwei/nginx-operator
 
 go 1.13
 

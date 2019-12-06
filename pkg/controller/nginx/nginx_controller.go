@@ -3,7 +3,7 @@ package nginx
 import (
 	"context"
 
-	appv1alpha1 "github.com/unified-operator/nginx-operator/pkg/apis/app/v1alpha1"
+	appv1alpha1 "github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

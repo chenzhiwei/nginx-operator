@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/unified-operator/nginx-operator/pkg/controller/nginx"
+	"github.com/chenzhiwei/nginx-operator/pkg/controller/nginx"
 )
 
 func init() {
