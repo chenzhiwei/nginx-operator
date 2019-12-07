@@ -144,6 +144,9 @@ func newDeploymentForCR(cr *appv1alpha1.Nginx) *appsv1.Deployment {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(cr.Spec.Replicas),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: labels,
@@ -152,7 +155,7 @@ func newDeploymentForCR(cr *appv1alpha1.Nginx) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:  "nginx",
-							Image: "quay.io/siji/nginx:1.16.1",
+							Image: "quay.io/siji/nginx:fake",
 						},
 					},
 				},
