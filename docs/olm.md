@@ -77,7 +77,7 @@ export QUAY_NAMESPACE=siji
 export PACKAGE_NAME=nginx-app
 export PACKAGE_VERSION=0.0.1
 
-operator-courier push  "$QUAY_NAMESPACE" "$PACKAGE_NAME" "$PACKAGE_VERSION" "$QUAY_TOKEN"
+operator-courier push "$OPERATOR_DIR" "$QUAY_NAMESPACE" "$PACKAGE_NAME" "$PACKAGE_VERSION" "$QUAY_TOKEN"
 ```
 
 ### Test with OCP
@@ -91,3 +91,12 @@ kubectl apply -f deploy/olm-test/nginx-operator-group.yaml
 
 kubectl apply -f deploy/olm-test/nginx-subscription.yaml
 ```
+
+
+## In the end
+
+Finally we will get following:
+
+* quay.io/siji/nginx:fake The app image
+* quay.io/siji/nginx-operator The oprator image
+* quay.io/siji/nginx-app The OLM application
