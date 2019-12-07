@@ -22,11 +22,11 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - kind: Nginx
+    - description: The Nginx CRD
+      displayName: Nginx
+      kind: Nginx
       name: nginxes.app.siji
       version: v1alpha1
-      description: The Nginx CRD
-      displayName: Nginx
   description: Deploy Nginx by using operator
   displayName: Nginx Operator
   install:

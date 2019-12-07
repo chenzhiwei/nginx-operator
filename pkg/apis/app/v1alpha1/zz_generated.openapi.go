@@ -68,7 +68,7 @@ func schema_pkg_apis_app_v1alpha1_NginxSpec(ref common.ReferenceCallback) common
 				Description: "NginxSpec defines the desired state of Nginx",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"replica": {
+					"replicas": {
 						SchemaProps: spec.SchemaProps{
 							Description: "INSERT ADDITIONAL SPEC FIELDS - desired state of cluster Important: Run \"operator-sdk generate k8s\" to regenerate code after modifying this file Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html",
 							Type:        []string{"integer"},
@@ -76,7 +76,7 @@ func schema_pkg_apis_app_v1alpha1_NginxSpec(ref common.ReferenceCallback) common
 						},
 					},
 				},
-				Required: []string{"replica"},
+				Required: []string{"replicas"},
 			},
 		},
 	}
