@@ -12,7 +12,6 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/chenzhiwei/nginx-operator/pkg/apis"
-	appv1alpha1 "github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 	"github.com/chenzhiwei/nginx-operator/pkg/controller"
 	"github.com/chenzhiwei/nginx-operator/version"
 
@@ -25,11 +24,7 @@ import (
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/spf13/pflag"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -150,9 +145,6 @@ func main() {
 
 	log.Info("Starting the Cmd.")
 
-	// Initialize the default Nginx CR
-	initInstance(mgr.GetAPIReader(), mgr.GetClient())
-
 	// Start the Cmd
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "Manager exited non-zero")
@@ -182,46 +174,4 @@ func serveCRMetrics(cfg *rest.Config) error {
 		return err
 	}
 	return nil
-}
-
-func initInstance(reader client.Reader, client client.Client) error {
-	name := "default"
-	namespace := os.Getenv("WATCH_NAMESPACE")
-
-	log.Info(fmt.Sprintf("Trying to create Nginx CR with name %s and namespace %s", name, namespace))
-
-	// Fetch the Nginx CR
-	cr := &appv1alpha1.Nginx{}
-	err := reader.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: namespace}, cr)
-	if err != nil && errors.IsNotFound(err) {
-		nginx := newNginxCR(name, namespace)
-		err = client.Create(context.TODO(), nginx)
-		if err != nil {
-			log.Error(err, "Error creating Nginx CR, please create it manually")
-		}
-
-		log.Info("Nginx CR was created successfully")
-
-		return nil
-	} else if err != nil {
-		log.Error(err, "Error fetching Nginx CR")
-
-		return nil
-	}
-
-	log.Info(fmt.Sprintf("Nginx CR with name %s and namespace %s already exist", name, namespace))
-
-	return nil
-}
-
-func newNginxCR(name, namespace string) *appv1alpha1.Nginx {
-	return &appv1alpha1.Nginx{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: appv1alpha1.NginxSpec{
-			Replicas: 1,
-		},
-	}
 }
