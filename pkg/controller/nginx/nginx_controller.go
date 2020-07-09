@@ -157,6 +157,13 @@ func newDeploymentForCR(cr *appv1alpha1.Nginx) *appsv1.Deployment {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{
+						{
+							Name:    "init",
+							Image:   "quay.io/siji/nginx:fake",
+							Command: []string{"sleep", "5"},
+						},
+					},
 					Containers: []corev1.Container{
 						{
 							Name:  "nginx",

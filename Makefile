@@ -16,7 +16,14 @@ image: build
 push-image:
 	docker push $(QUAY_REPO)/$(IMAGE_NAME):$(VERSION)
 
+code-gen:
+	@echo Updating the deep copy files with the changes in the API
+	operator-sdk generate k8s
+	@echo Updating the CRD files with the OpenAPI validations
+	operator-sdk generate crds
+
 generate-csv:
+	@echo Updating/Generating a ClusterServiceVersion YAML manifest for the operator
 	operator-sdk generate csv --csv-version $(VERSION) --update-crds
 
 push-csv:
