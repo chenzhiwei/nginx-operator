@@ -2,8 +2,6 @@ package nginx
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	appv1alpha1 "github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -63,9 +61,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	if err != nil {
 		return err
 	}
-
-	// Initialize the default Nginx CR
-	initInstance(mgr.GetClient())
 
 	return nil
 }
@@ -174,28 +169,6 @@ func newDeploymentForCR(cr *appv1alpha1.Nginx) *appsv1.Deployment {
 			},
 		},
 	}
-}
-
-func initInstance(client client.Client) error {
-	name := "default"
-	namespace := os.Getenv("WATCH_NAMESPACE")
-
-	log.Info(fmt.Sprintf("Trying to create Nginx CR with name %s and namespace %s", name, namespace))
-
-	nginx := newNginxCR(name, namespace)
-	err := client.Create(context.TODO(), nginx)
-	if errors.IsAlreadyExists(err) {
-		log.Info(fmt.Sprintf("Nginx CR with name %s and namespace %s already exist", name, namespace))
-		return nil
-	}
-
-	if err == nil {
-		log.Info("Nginx CR was created successfully")
-		return nil
-	}
-
-	log.Error(err, "Error creating Nginx CR, please create it manually")
-	return err
 }
 
 func newNginxCR(name, namespace string) *appv1alpha1.Nginx {
