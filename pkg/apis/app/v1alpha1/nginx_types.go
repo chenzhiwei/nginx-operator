@@ -1,11 +1,16 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+type Container struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
 
 // NginxSpec defines the desired state of Nginx
 // +k8s:openapi-gen=true
@@ -13,7 +18,9 @@ type NginxSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	Replicas int32 `json:"replicas"`
+	Replicas      int32     `json:"replicas"`
+	InitContainer Container `json:"init,omitempty"`
+	AppContainer  Container `json:"nginx,omitempty"`
 }
 
 // NginxStatus defines the observed state of Nginx

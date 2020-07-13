@@ -3,5 +3,11 @@ kind: Nginx
 metadata:
   name: example-nginx
 spec:
-  # Add fields here
-  size: 3
+  replicas: 1
+  init:
+    resources: {}
+  nginx:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 64Mi

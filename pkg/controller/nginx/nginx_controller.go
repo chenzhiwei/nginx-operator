@@ -2,8 +2,8 @@ package nginx
 
 import (
 	"context"
+	"reflect"
 
-	appv1alpha1 "github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,6 +18,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	appv1alpha1 "github.com/chenzhiwei/nginx-operator/pkg/apis/app/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_nginx")
@@ -101,10 +103,15 @@ func (r *ReconcileNginx) Reconcile(request reconcile.Request) (reconcile.Result,
 		return reconcile.Result{}, err
 	}
 
+	// Delete event triggered
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		// add the deletion logic here
+	}
+
 	// Define a new Deployment object
 	deployment := newDeploymentForCR(instance)
 
-	// Set Nginx deployment as the owner and controller
+	// Set Nginx deployment as the owner
 	if err := controllerutil.SetControllerReference(instance, deployment, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
@@ -112,6 +119,7 @@ func (r *ReconcileNginx) Reconcile(request reconcile.Request) (reconcile.Result,
 	// Check if this Deployment already exists
 	found := &appsv1.Deployment{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
+	// The Deployment does not exist, create it
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new Deployment", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
 		err = r.client.Create(context.TODO(), deployment)
@@ -121,13 +129,51 @@ func (r *ReconcileNginx) Reconcile(request reconcile.Request) (reconcile.Result,
 
 		// Deployment created successfully - don't requeue
 		return reconcile.Result{}, nil
+
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Deployment already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Deployment already exists", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
+	// Check if the Deployment is desired state
+	if isDeploymentChanged(deployment, found) {
+		// Update the Deployment into desired state
+		err = r.client.Update(context.TODO(), deployment)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
 	return reconcile.Result{}, nil
+}
+
+func isDeploymentChanged(d1, d2 *appsv1.Deployment) bool {
+	if *d1.Spec.Replicas != *d2.Spec.Replicas {
+		return true
+	}
+
+	if len(d1.Spec.Template.Spec.InitContainers) != len(d2.Spec.Template.Spec.InitContainers) {
+		return true
+	} else {
+		for i, container := range d1.Spec.Template.Spec.InitContainers {
+			if !reflect.DeepEqual(container.Resources, d2.Spec.Template.Spec.InitContainers[i].Resources) {
+				return true
+			}
+		}
+	}
+
+	if len(d1.Spec.Template.Spec.Containers) != len(d2.Spec.Template.Spec.Containers) {
+		return true
+	} else {
+		for i, container := range d1.Spec.Template.Spec.Containers {
+			if !reflect.DeepEqual(container.Resources, d2.Spec.Template.Spec.Containers[i].Resources) {
+				return true
+			}
+		}
+	}
+
+	// add your other comparisons here
+
+	return false
 }
 
 // newDeploymentForCR returns an Nginx deployment with the same name/namespace as the cr
@@ -154,31 +200,21 @@ func newDeploymentForCR(cr *appv1alpha1.Nginx) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					InitContainers: []corev1.Container{
 						{
-							Name:    "init",
-							Image:   "quay.io/siji/nginx:fake",
-							Command: []string{"sleep", "5"},
+							Name:      "init",
+							Image:     "quay.io/siji/nginx:fake",
+							Command:   []string{"sleep", "5"},
+							Resources: cr.Spec.InitContainer.Resources,
 						},
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  "nginx",
-							Image: "quay.io/siji/nginx:fake",
+							Name:      "nginx",
+							Image:     "quay.io/siji/nginx:fake",
+							Resources: cr.Spec.AppContainer.Resources,
 						},
 					},
 				},
 			},
-		},
-	}
-}
-
-func newNginxCR(name, namespace string) *appv1alpha1.Nginx {
-	return &appv1alpha1.Nginx{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: appv1alpha1.NginxSpec{
-			Replicas: 1,
 		},
 	}
 }
